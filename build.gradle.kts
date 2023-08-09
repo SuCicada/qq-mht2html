@@ -2,7 +2,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     kotlin("multiplatform")
-    id("org.jetbrains.compose")
+    id("org.jetbrains.compose")  version "1.4.3"
 }
 
 group = "moe.nyamori"
@@ -24,10 +24,13 @@ kotlin {
     sourceSets {
         val jvmMain by getting {
             dependencies {
-                implementation(compose.desktop.currentOs)
+                implementation(compose.desktop.macos_arm64)
                 implementation("org.apache.commons:commons-imaging:1.0-alpha3")
                 implementation("commons-codec:commons-codec:1.15")
                 implementation("org.apache.commons:commons-lang3:3.12.0")
+//                implementation("io.ktor:ktor-server-freemarker:2.3.3")
+                implementation("org.freemarker:freemarker:2.3.32")
+                implementation("org.jsoup:jsoup:1.16.1")
 
                 // Loggin
                 implementation("org.slf4j:slf4j-api:2.0.7")
@@ -81,3 +84,12 @@ compose.desktop {
         }
     }
 }
+
+tasks.register<JavaExec>("runCli") {
+    group = "Application"
+    description = "Runs the Cli.kt file"
+
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("CliKt") // replace with your package and class name
+}
+

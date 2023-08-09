@@ -1,4 +1,3 @@
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -19,9 +18,9 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.text.Charsets.UTF_8
 
-@ExperimentalMaterialApi
-@ExperimentalCoroutinesApi
-@ObsoleteCoroutinesApi
+//@ExperimentalMaterialApi
+//@ExperimentalCoroutinesApi
+//@ObsoleteCoroutinesApi
 object Mht2Html {
     private lateinit var BOUNDARY: String
     private const val DEFAULT_THREAD_COUNT = 3
@@ -30,7 +29,10 @@ object Mht2Html {
     var errMsg: MutableState<String>? = null
     var progress: MutableState<Float>? = null
     val LOGGER = LoggerFactory.getLogger(Mht2Html::class.java)
-
+    fun getCustomHeader(): String {
+        val js = "utils.js"
+        return """<script src="$js"></script>"""
+    }
     fun doJob(
         fileLocation: String,
         fileOutputPath: String,
@@ -490,6 +492,8 @@ object Mht2Html {
         val dateCell = firstLine.substring(startOfDateCell, endOfDateCellPlusOne)
         sb.append(firstLine.substring(0, startOfStyleTag))
         sb.append(CRLF)
+        sb.append(getCustomHeader())
+        sb.append(CRLF)
         sb.append("$OPENING_STYLE_TAG_FOR_FIRST_LINE$STYLE_PLACEHOLDER$CLOSING_STYLE_TAG")
         sb.append(firstLine.substring(endOfStyleTagPlusOne, startOfDateCell))
 
@@ -574,11 +578,14 @@ object Mht2Html {
                 val className = "stl-" + (styleClassNameMap.size + 1)
                 styleClassNameMap[styleSheet] = className
             }
-            sb.append(line.substring(prevIndex, startOfStyleAttribute))
+            val s1 = line.substring(prevIndex, startOfStyleAttribute)
+            sb.append(s1)
             sb.append("class=\"${styleClassNameMap[styleSheet]!!}\"")
             prevIndex = endOfStyleAttribute
+            if (sb[sb.length-1]=='"' && line[prevIndex] == '"') prevIndex++ //line.substring(prevIndex + 1)
         }
-        sb.append(line.substring(prevIndex))
+        val s2 = line.substring(prevIndex)
+        sb.append(s2)
 
         // Handling Date
         if (DATE_REGEX.matches(line)) {
